@@ -63,6 +63,9 @@ impl Chain {
     }
 
     pub fn sample(self: &Self, state: &Vec<usize>) -> Option<usize> {
+        if state.len() != self.order {
+            panic!("length of state must be same as chain order");
+        }
         match self.transitions.get(state) {
             Some(hcounts) => {
                 let history = &hcounts.0;
