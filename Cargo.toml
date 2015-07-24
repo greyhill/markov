@@ -5,4 +5,7 @@ authors = ["Madison McGaffin <greyhill@gmail.com>"]
 
 [lib]
 path = "src/lib.rs"
-name = "markov" 
+name = "markov"
+
+[dependencies.rand]
+rand = "0.3.8"
