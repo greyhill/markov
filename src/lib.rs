@@ -1,4 +1,7 @@
+extern crate rand;
+
 use std::collections::HashMap;
+use rand::random;
 
 struct Chain {
     order: usize,
@@ -56,6 +59,30 @@ impl Chain {
         self.history.clear();
         for _ in 0 .. self.order {
             self.history.push(0usize);
+        }
+    }
+
+    pub fn sample(self: &Self, state: &Vec<usize>) -> Option<usize> {
+        match self.transitions.get(state) {
+            Some(hcounts) => {
+                let history = &hcounts.0;
+                let counts = &hcounts.1;
+
+                // sample from multinomial distribution
+                let index = random::<usize>() % counts;
+                let mut left = 0usize;
+                for (x_dest, x_counts) in history.iter() {
+                    let right = left + x_counts;
+                    if (index >= left) & (index < right) {
+                        return Some(*x_dest);
+                    }
+                    left = right;
+                }
+                panic!("internal state error");
+            },
+            None => {
+                None
+            }
         }
     }
 }
