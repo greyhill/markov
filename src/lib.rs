@@ -2,6 +2,13 @@ use std::collections::HashMap;
 
 struct Chain {
     order: usize,
+    // the key of transitions is history, i.e., the conditional state of the markov chain
+    // the value of transitions is a tuple:
+    //      - the first element of the tuple is a hashmap.  the first entry is destination
+    //          states; the second entry is the relative probability of that transition (i.e.,
+    //          a count of the number of times that transition has occurred.)
+    //      - the second element is a normalizing factor: the total number of transitions from
+    //          this conditional state.
     transitions: HashMap<Vec<usize>, (HashMap<usize, usize>, usize)>,
     history: Vec<usize>,
 }
