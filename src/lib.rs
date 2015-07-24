@@ -3,7 +3,7 @@ extern crate rand;
 use std::collections::HashMap;
 use rand::random;
 
-struct Chain {
+pub struct Chain {
     order: usize,
     // the key of transitions is history, i.e., the conditional state of the markov chain
     // the value of transitions is a tuple:
@@ -14,6 +14,11 @@ struct Chain {
     //          this conditional state.
     transitions: HashMap<Vec<usize>, (HashMap<usize, usize>, usize)>,
     history: Vec<usize>,
+}
+
+pub struct ChainIterator<'c> {
+    chain: &'c Chain,
+    state: Option<Vec<usize>>
 }
 
 impl Chain {
@@ -28,6 +33,10 @@ impl Chain {
         };
         chain.end_sentence();
         chain
+    }
+
+    pub fn order(self: &Self) -> usize {
+        self.order
     }
 
     pub fn add_atom(self: &mut Self, atom: usize) -> () {
@@ -62,6 +71,13 @@ impl Chain {
         }
     }
 
+    pub fn sample_seq(self: &Self, initial: &Vec<usize>) -> ChainIterator {
+        ChainIterator{
+            chain: self,
+            state: Some(initial.clone())
+        }
+    }
+
     pub fn sample(self: &Self, state: &Vec<usize>) -> Option<usize> {
         if state.len() != self.order {
             panic!("length of state must be same as chain order");
@@ -86,6 +102,32 @@ impl Chain {
             None => {
                 None
             }
+        }
+    }
+}
+
+impl<'a> Iterator for ChainIterator<'a> {
+    type Item = usize;
+
+    fn next(self: &mut Self) -> Option<Self::Item> {
+        let tr = if let Some(ref mut st) = self.state {
+            let item_opt = self.chain.sample(st);
+            if let Some(item) = item_opt {
+                st.pop();
+                st.insert(0, item);
+                Some(item)
+            } else {
+                None
+            }
+        } else {
+            None
+        };
+
+        if let Some(x) = tr {
+            Some(x)
+        } else {
+            self.state = None;
+            None
         }
     }
 }
